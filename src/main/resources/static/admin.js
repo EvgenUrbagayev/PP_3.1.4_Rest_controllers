@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td>${user.id}</td>
                 <td>${user.username || user.name}</td>
+                <td>${user.surname || '-'}</td>
                 <td>${user.age}</td>
                 <td>${formatRoles(user.roles)}</td>
                 <td>
@@ -197,29 +198,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(DOM.editUserForm);
         const userId = formData.get('id');
 
-        const user = {
-            id: userId,
-            username: formData.get('username'),
-            age: formData.get('age'),
-            password: formData.get('password'),
-            roles: getSelectedRoles(DOM.rolesEditSelect)
-        };
-
         try {
+            // Загружаем текущие данные пользователя, чтобы не потерять surname
+            const userResponse = await fetch(`${API.USERS}/${userId}`);
+            if (!userResponse.ok) throw new Error('Ошибка загрузки данных пользователя');
+            const userData = await userResponse.json();
+
+            const user = {
+                id: userId,
+                username: formData.get('username'),
+                name: formData.get('username') || userData.name, // Используем текущее имя, если username пуст
+                surname: userData.surname, // Берем из существующих данных
+                age: formData.get('age'),
+                password: formData.get('password'),
+                roles: getSelectedRoles(DOM.rolesEditSelect)
+            };
+
             const response = await fetch(`${API.USERS}/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(user)
             });
 
-            if (!response.ok) throw new Error('Failed to update user');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Ошибка обновления пользователя');
+            }
 
-            await loadUsers();
+            await loadUsers(); // Обновляем таблицу
             $('#editModal').modal('hide');
-            alert('User updated successfully!');
-        } catch (error) {
-            console.error('Error updating user:', error);
-            alert('Failed to update user. Please try again.');
+            alert('Данные пользователя обновлены!');
+        } catch (error) {  // Теперь catch корректно обрабатывается
+            console.error('Ошибка:', error);
+            alert(`Не удалось обновить пользователя: ${error.message}`);
         }
     }
 
