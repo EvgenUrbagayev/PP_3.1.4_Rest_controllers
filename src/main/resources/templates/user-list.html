@@ -1,0 +1,63 @@
+
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>User panel</title>
+</head>
+<body>
+<div class="container" style="max-width: 100%">
+  <div class="row navbar navbar-dark bg-dark pd-0 pt-0">
+    <div id="navBarUser" class="col">
+    </div>
+    <div class="col-1">
+      <a class="nav-link active text-white-50" href="/logout">Logout</a>
+    </div>
+  </div>
+</div>
+<div class="container" style="max-width: 100%">
+  <div class="row" style="height: 120vh">
+    <div class="col-2 pt-3 pl-0 pr-0">
+      <nav class="nav flex-column nav-pills">
+        <a class="nav-link active" href="/user">User</a>
+      </nav>
+    </div>
+    <div class="col-10 bg-light pt-3 pl-0 pr-0">
+      <div class="container">
+        <h1>User panel</h1>
+
+        <div class="card">
+          <div class="bg-light p-2 pl-4 font-weight-bold"><h5>Your information</h5></div>
+          <div class="card-block p-3">
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Surname</th>
+                <th scope="col">Age</th>
+                <th scope="col">Role</th>
+              </tr>
+              </thead>
+              <tbody id="userInfo">
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script defer src="/user.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
