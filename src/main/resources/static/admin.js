@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // API endpoints
     const API = {
-        USERS: '/api/admin-list/users',
-        ROLES: '/api/admin-list/roles'
+        USERS: '/api/admin/users',
+        ROLES: '/api/admin/roles'
     };
 
     // DOM elements
@@ -44,9 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(API.ROLES);
             if (!response.ok) throw new Error('Failed to load roles');
 
-            const rolesData = await response.json();
-            // Assuming rolesData is List<List<Role>> - take first element
-            const roles = Array.isArray(rolesData) ? rolesData[0] : [];
+            const roles = await response.json();
             renderRolesSelect(roles, DOM.rolesSelect);
             renderRolesSelect(roles, DOM.rolesEditSelect);
         } catch (error) {
@@ -140,14 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(DOM.newUserForm);
 
         const user = {
+            username: String(formData.get('name')),
             name: String(formData.get('name')),
             surname: String(formData.get('surname')),
             age: parseInt(formData.get('age')),
             password: String(formData.get('pass')),
             roles: getSelectedRoles(DOM.rolesSelect)
         };
-
-        console.log('Отправляемые данные:', JSON.stringify(user, null, 2));
 
         try {
             const response = await fetch(API.USERS, {
@@ -173,22 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function getSelectedRolesWithAuthority(selectElement) {
-        return Array.from(selectElement.selectedOptions)
-            .filter(opt => opt.value)
-            .map(opt => ({
-                id: opt.value,
-                authority: opt.textContent || `ROLE_${opt.value}`
-            }));
-    }
-
-// Измененная функция getSelectedRoles
     function getSelectedRoles(selectElement) {
         return Array.from(selectElement.selectedOptions)
             .filter(opt => opt.value)
             .map(opt => ({
                 id: opt.value,
-                authority: opt.textContent || `ROLE_${opt.value}` // Добавляем authority
+                authority: opt.textContent || `ROLE_${opt.value}`
             }));
     }
 
@@ -199,21 +186,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const userId = formData.get('id');
 
         try {
-            // Загружаем текущие данные пользователя, чтобы не потерять surname
-            const userResponse = await fetch(`${API.USERS}/${userId}`);
-            if (!userResponse.ok) throw new Error('Ошибка загрузки данных пользователя');
-            const userData = await userResponse.json();
+            // Сначала получаем текущие данные пользователя
+            const currentUserResponse = await fetch(`${API.USERS}/${userId}`);
+            if (!currentUserResponse.ok) throw new Error('Ошибка загрузки данных пользователя');
+            const currentUser = await currentUserResponse.json();
 
+            // Создаем объект с обновленными данными
             const user = {
                 id: userId,
-                username: formData.get('username'),
-                name: formData.get('username') || userData.name, // Используем текущее имя, если username пуст
-                surname: userData.surname, // Берем из существующих данных
-                age: formData.get('age'),
-                password: formData.get('password'),
-                roles: getSelectedRoles(DOM.rolesEditSelect)
+                username: formData.get('username') || currentUser.username,
+                name: formData.get('username') || currentUser.name,
+                surname: formData.get('surname') || currentUser.surname, // Сохраняем текущее значение, если новое не указано
+                age: parseInt(formData.get('age')) || currentUser.age,
+                password: formData.get('password'), // Пароль обрабатывается отдельно
+                roles: getSelectedRoles(DOM.rolesEditSelect) || currentUser.roles
             };
 
+            // Отправляем обновленные данные
             const response = await fetch(`${API.USERS}/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -225,10 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.message || 'Ошибка обновления пользователя');
             }
 
-            await loadUsers(); // Обновляем таблицу
+            await loadUsers();
             $('#editModal').modal('hide');
             alert('Данные пользователя обновлены!');
-        } catch (error) {  // Теперь catch корректно обрабатывается
+        } catch (error) {
             console.error('Ошибка:', error);
             alert(`Не удалось обновить пользователя: ${error.message}`);
         }
@@ -256,12 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ========== UTILITIES ==========
-
-    function getSelectedRoles(selectElement) {
-        return Array.from(selectElement.selectedOptions)
-            .filter(opt => opt.value)
-            .map(opt => ({ id: opt.value }));
-    }
 
     async function loadUserForEdit() {
         const userId = document.querySelector('[data-action="edit"].active')?.dataset.id;
@@ -311,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = button.closest('tr');
             document.getElementById('idDelete').value = userId;
             document.getElementById('usernameDelete').value = row.cells[1].textContent;
-            document.getElementById('ageDelete').value = row.cells[2].textContent;
+            document.getElementById('ageDelete').value = row.cells[3].textContent;
 
             // Format roles for display
             const rolesSelect = document.getElementById('rolesDelete');
@@ -326,6 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
             $('#deleteModal').modal('show');
         }
     }
-});
 
+});
 

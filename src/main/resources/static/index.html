@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        fetch('/api/auth/current')
+            .then(response => {
+                if (response.ok) {
+                    response.json().then(user => {
+                        window.location.href = user.roles.includes('ROLE_ADMIN')
+                            ? '/admin.html'
+                            : '/user.html';
+                    });
+                } else {
+                    window.location.href = '/login.html';
+                }
+            });
+    </script>
+</head>
+<body>
+<p>Redirecting...</p>
+</body>
+</html>
